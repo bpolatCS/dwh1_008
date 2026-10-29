@@ -8,14 +8,14 @@ TRUNCATE TABLE dim_healtheffect RESTART IDENTITY CASCADE;
 INSERT INTO dim_healtheffect (
     effect_profile, 
     effect_count,
-    is_respiratory, 
+    is_respiratory,
     is_cardiovascular, 
     is_cancer_risk,
-    is_neurological, 
-    is_allergic, 
+    is_neurological,
+    is_allergic,
     is_eye_irritation
 )
-    
+
 WITH param_profile AS (
     SELECT
         p.id AS param_id,
@@ -34,13 +34,13 @@ WITH param_profile AS (
 );
 
 SELECT DISTINCT
-    effect_profile, 
+    effect_profile,
     effect_count,
-    is_respiratory, 
+    is_respiratory,
     is_cardiovascular, 
     is_cancer_risk,
-    is_neurological, 
-    is_allergic, 
+    is_neurological,
+    is_allergic,
     is_eye_irritation
 FROM param_profile
 ORDER BY effect_count, effect_profile;

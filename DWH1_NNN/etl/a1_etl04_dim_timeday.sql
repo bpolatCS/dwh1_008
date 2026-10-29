@@ -1,15 +1,27 @@
--- Load the shared daily calendar dimension.
+-- DWH1 ETL: load dim_timeday
+-- The orchestrator supplies the warehouse/staging search_path for this transaction.
+
+-- Step 1: Truncate target table
 TRUNCATE TABLE dim_timeday RESTART IDENTITY CASCADE;
 
-INSERT INTO dim_timeday (full_date, day_number, month_number, quarter_number, year_number)
+-- Step 2: Insert from source
+INSERT INTO dim_timeday (
+    full_date,
+    day_number,
+    month_number,
+    quarter_number,
+    year_number
+)
 SELECT dates.full_date,
        EXTRACT(DAY FROM dates.full_date)::INT,
        EXTRACT(MONTH FROM dates.full_date)::INT,
        EXTRACT(QUARTER FROM dates.full_date)::INT,
        EXTRACT(YEAR FROM dates.full_date)::INT
 FROM (
-    SELECT servicedat AS full_date FROM tb_serviceevent
+    SELECT servicedat AS full_date
+    FROM tb_serviceevent
     UNION
-    SELECT readat AS full_date FROM tb_readingevent
+    SELECT readat AS full_date
+    FROM tb_readingevent
 ) AS dates
 ORDER BY dates.full_date;

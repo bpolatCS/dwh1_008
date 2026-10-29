@@ -1,4 +1,4 @@
--- DWH1 ETL: load dim_name3
+-- DWH1 ETL: load dim_paramalert
 -- The orchestrator supplies the warehouse/staging search_path for this transaction.
 
 -- Step 1: Truncate target table
@@ -45,7 +45,7 @@ SELECT
     p.id,
     b.alert_id,
     p.paramname,
-    b.alert_name,    
+    b.alert_name,
     p.category,
     p.purpose,
     p.unit,

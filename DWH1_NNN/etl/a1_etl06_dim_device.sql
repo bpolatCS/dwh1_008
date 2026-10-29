@@ -1,28 +1,32 @@
--- Load shared device dimension, including flattened geographic hierarchy.
+-- DWH1 ETL: load dim_device
+-- The orchestrator supplies the warehouse/staging search_path for this transaction.
+
+-- Step 1: Truncate target table
 TRUNCATE TABLE dim_device RESTART IDENTITY CASCADE;
 
+-- Step 2: Insert from source
 INSERT INTO dim_device (
-    device_src_id, 
-    sensor_type_name, 
-    manufacturer, 
+    device_id,
+    sensor_type_name,
+    manufacturer,
     technology,
-    location_name, 
-    location_type, 
-    city_name, 
+    location_name,
+    location_type,
+    city_name,
     country_name,
     altitude,
     İnstalled_at
 )
 SELECT
-    d.id, 
-    st.typename, 
-    st.manufacturer, 
+    d.id,
+    st.typename,
+    st.manufacturer,
     st.technology,
-    d.locationname, 
-    d.locationtype, 
-    c.cityname, 
+    d.locationname,
+    d.locationtype,
+    c.cityname,
     co.countryname,
-    d.altitude, 
+    d.altitude,
     d.installedat
 FROM tb_sensordevice AS d
 LEFT JOIN tb_sensortype AS st ON st.id = d.sensortypeid
