@@ -6,7 +6,7 @@ TRUNCATE TABLE dim_paramalert RESTART IDENTITY CASCADE;
 
 -- Step 2: Insert from source
 INSERT INTO dim_paramalert (
-    param_id
+    param_id,
     alert_id,
     param_name,
     alert_name,
@@ -27,8 +27,8 @@ WITH bands AS (
         a.alertname AS alert_name,
         a.colour AS alert_colour,
         pa.threshold AS threshold_from
-    FROM tb_paramalert_csv pa
-    JOIN tb_alert_csv a ON a.id = pa.alertid
+    FROM tb_paramalert pa
+    JOIN tb_alert a ON a.id = pa.alertid
     
     UNION ALL
     
@@ -39,7 +39,7 @@ WITH bands AS (
         'No alert', 
         'None', 
         0
-    FROM tb_param_csv p
+    FROM tb_param p
 )
 SELECT
     p.id,
@@ -54,5 +54,5 @@ SELECT
     b.threshold_from,
     LEAD(b.threshold_from) OVER (PARTITION BY b.param_id ORDER BY b.alert_level) as threshold_to
 FROM bands b
-JOIN tb_param_csv p ON p.id = b.param_id
+JOIN tb_param p ON p.id = b.param_id
 ORDER BY p.id, b.alert_level;

@@ -21,12 +21,12 @@ SELECT
 FROM (
     SELECT 
         servicedat AS full_date
-    FROM tb_serviceevent_csv
+    FROM tb_serviceevent
 
     UNION
     
     SELECT 
         readat AS full_date
-    FROM tb_readingevent_csv
+    FROM tb_readingevent
 ) AS dates
 ORDER BY dates.full_date;

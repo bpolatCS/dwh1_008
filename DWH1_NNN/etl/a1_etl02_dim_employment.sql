@@ -7,11 +7,11 @@ TRUNCATE TABLE dim_employment RESTART IDENTITY CASCADE;
 -- Step 2: Insert from source
 INSERT INTO dim_employment (
     employee_id,
-    badgenumber,
+    badge_number,
     role_id,
-    rolename,
-    rolelevel,
-    rolecategory,
+    role_name,
+    role_level,
+    role_category,
     effective_date,
     expiry_date,
     is_current,

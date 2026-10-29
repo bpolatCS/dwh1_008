@@ -15,7 +15,7 @@ INSERT INTO dim_device (
     city_name,
     country_name,
     altitude,
-    İnstalled_at
+    installed_at
 )
 SELECT
     d.id,
