@@ -12,16 +12,21 @@ INSERT INTO dim_timeday (
     quarter_number,
     year_number
 )
-SELECT dates.full_date,
-       EXTRACT(DAY FROM dates.full_date)::INT,
-       EXTRACT(MONTH FROM dates.full_date)::INT,
-       EXTRACT(QUARTER FROM dates.full_date)::INT,
-       EXTRACT(YEAR FROM dates.full_date)::INT
+SELECT 
+    dates.full_date,
+    EXTRACT(DAY FROM dates.full_date)::INT as day_number,
+    EXTRACT(MONTH FROM dates.full_date)::INT as month_number,
+    EXTRACT(QUARTER FROM dates.full_date)::INT as quarter_number,
+    EXTRACT(YEAR FROM dates.full_date)::INT as year_number
 FROM (
-    SELECT servicedat AS full_date
-    FROM tb_serviceevent
+    SELECT 
+        servicedat AS full_date
+    FROM tb_serviceevent_csv
+
     UNION
-    SELECT readat AS full_date
-    FROM tb_readingevent
+    
+    SELECT 
+        readat AS full_date
+    FROM tb_readingevent_csv
 ) AS dates
 ORDER BY dates.full_date;

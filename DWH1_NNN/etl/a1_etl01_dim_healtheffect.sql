@@ -15,6 +15,10 @@ INSERT INTO dim_health_effect (
     is_allergic,
     is_eye_irritation
 )
+Binder Error: 
+Table "h" does not have a column named "id" Candidate bindings: : "id,effectname,description" LINE 13: LEFT JOIN tb_healtheffect_csv h ON h.id = ph.effectid ^
+
+
 
 WITH param_profile AS (
     SELECT
@@ -28,8 +32,8 @@ WITH param_profile AS (
         COALESCE(BOOL_OR(h.effectname = 'Allergic'), FALSE) AS is_allergic,
         COALESCE(BOOL_OR(h.effectname = 'Eye irritation'), FALSE) AS is_eye_irritation
     FROM tb_param p
-    LEFT JOIN tb_paramhealtheffect ph ON ph.paramid = p.id
-    LEFT JOIN tb_healtheffect h ON h.id = ph.effectid
+    LEFT JOIN tb_paramhealtheffect_csv ph ON ph.paramid = p.id
+    LEFT JOIN tb_healtheffect_csv h ON h.id = ph.effectid
     GROUP BY p.id
 )
 

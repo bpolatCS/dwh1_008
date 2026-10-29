@@ -39,7 +39,7 @@ WITH bands AS (
         'No alert', 
         'None', 
         0
-    FROM tb_param p
+    FROM tb_param_csv p
 )
 SELECT
     p.id,

@@ -1,25 +1,21 @@
--- DWH1 warehouse DDL
--- Creates the dimensional-model tables in the active warehouse schema.
--- The table and column definitions below are placeholders.
--- Replace them with your own dimensional model, add/remove tables as required.
--- The orchestrator supplies the correct search_path before this file is executed.
-
 -- -------------------------------
 -- 1) DROP TABLE before attempting to create DWH schema tables
 -- -------------------------------
 DROP TABLE IF EXISTS ft_name2;
 DROP TABLE IF EXISTS ft_name1;
 
+DROP TABLE IF EXISTS dim_device;
+DROP TABLE IF EXISTS dim_service_type;
+DROP TABLE IF EXISTS dim_timeday;
 DROP TABLE IF EXISTS dim_paramalert;
 DROP TABLE IF EXISTS dim_health_effect;
 DROP TABLE IF EXISTS dim_employment;
-DROP TABLE IF EXISTS ...
 
 -- -------------------------------
 -- 2) CREATE TABLE statements for facts and dimensions
 -- Please make sure the order in which individual statements are executed respects the FOREIGN KEY constraints
 -- -------------------------------
--- non-time dimensions
+
 CREATE TABLE dim_employment (
     employement_sk INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     employee_id INT NOT NULL,
@@ -73,23 +69,42 @@ CREATE TABLE dim_paramalert (
     CHECK (threshold_to IS NULL OR threshold_to > threshold_from)
 );
 
-CREATE TABLE dim_name3 (
-    id INT NOT NULL PRIMARY KEY,
-    -- ...
-    etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE dim_name5 (
-    id INT NOT NULL PRIMARY KEY,
-    -- ...
-    etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
 CREATE TABLE dim_timeday (
-    id INT NOT NULL PRIMARY KEY,
-    -- ...
+    timeday_sk INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    full_date DATE NOT NULL UNIQUE,
+    day_number INT NOT NULL CHECK (day_number BETWEEN 1 AND 31),
+    month_number INT NOT NULL CHECK (month_number BETWEEN 1 AND 12),
+    quarter_number INT NOT NULL CHECK (quarter_number BETWEEN 1 AND 4),
+    year_number INT NOT NULL,
     etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE dim_service_type (
+    servicetype_sk INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    servicetype_id INT NOT NULL UNIQUE,
+    service_name VARCHAR(255) NOT NULL,
+    service_category VARCHAR(255) NOT NULL,
+    service_group VARCHAR(255) NOT NULL,
+    minimum_qualification INT NOT NULL CHECK (minimum_qualification BETWEEN 1 AND 4),
+    service_details VARCHAR(255) NOT NULL,
+    etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE dim_device (
+    device_sk INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    device_id INT NOT NULL UNIQUE,
+    sensor_type_name VARCHAR(255) NOT NULL,
+    manufacturer VARCHAR(255) NOT NULL,
+    technology VARCHAR(255) NOT NULL,
+    location_name VARCHAR(255) NOT NULL,
+    location_type VARCHAR(255) NOT NULL,
+    city_name VARCHAR(255) NOT NULL,
+    country_name VARCHAR(255) NOT NULL,
+    altitude INT NOT NULL,
+    installed_at DATE NOT NULL,
+    etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 
 -- fact tables
 CREATE TABLE ft_name1 (
