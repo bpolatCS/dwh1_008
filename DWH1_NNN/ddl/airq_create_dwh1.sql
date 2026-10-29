@@ -10,12 +10,10 @@
 DROP TABLE IF EXISTS ft_name2;
 DROP TABLE IF EXISTS ft_name1;
 
-DROP TABLE IF EXISTS dim_timeday;
-DROP TABLE IF EXISTS dim_name4;
-DROP TABLE IF EXISTS dim_name3;
-DROP TABLE IF EXISTS dim_name2;
-DROP TABLE IF EXISTS dim_name1;
---- and so on ...
+DROP TABLE IF EXISTS dim_paramalert;
+DROP TABLE IF EXISTS dim_health_effect;
+DROP TABLE IF EXISTS dim_employment;
+DROP TABLE IF EXISTS ...
 
 -- -------------------------------
 -- 2) CREATE TABLE statements for facts and dimensions
@@ -81,13 +79,12 @@ CREATE TABLE dim_name3 (
     etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE dim_name4 (
+CREATE TABLE dim_name5 (
     id INT NOT NULL PRIMARY KEY,
     -- ...
     etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- time dimension(s)
 CREATE TABLE dim_timeday (
     id INT NOT NULL PRIMARY KEY,
     -- ...

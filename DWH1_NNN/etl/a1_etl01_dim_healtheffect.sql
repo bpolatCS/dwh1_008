@@ -1,11 +1,11 @@
--- DWH1 ETL: load dim_healtheffect
+-- DWH1 ETL: load dim_health_effect
 -- The orchestrator supplies the warehouse/staging search_path for this transaction.
 
 -- Step 1: Truncate target table
-TRUNCATE TABLE dim_healtheffect RESTART IDENTITY CASCADE;
+TRUNCATE TABLE dim_health_effect RESTART IDENTITY CASCADE;
 
 -- Step 2: Insert from source
-INSERT INTO dim_healtheffect (
+INSERT INTO dim_health_effect (
     effect_profile, 
     effect_count,
     is_respiratory,
@@ -31,7 +31,7 @@ WITH param_profile AS (
     LEFT JOIN tb_paramhealtheffect ph ON ph.paramid = p.id
     LEFT JOIN tb_healtheffect h ON h.id = ph.effectid
     GROUP BY p.id
-);
+)
 
 SELECT DISTINCT
     effect_profile,
