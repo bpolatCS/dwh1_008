@@ -26,26 +26,6 @@ DROP TABLE IF EXISTS tb_servicetype;
 -- Please make sure the order in which individual statements are executed respects the FOREIGN KEY constraints
 -- -------------------------------
 
-
--- A new dim table for health effect categories caused by air pollutants
-CREATE TABLE tb_healtheffect (
-    id INT NOT NULL PRIMARY KEY
-    , effectname VARCHAR(255) NOT NULL
-    , description VARCHAR(255) NOT NULL
-    , CONSTRAINT uc_healtheffect_effectname UNIQUE (effectname)
-);
-
--- A bridge table tb_param and tb_healtheffect
-CREATE TABLE tb_paramhealtheffect (
-    id INT NOT NULL PRIMARY KEY
-    , paramid INT NOT NULL
-    , effectid INT NOT NULL
-    , CONSTRAINT fk_paramhealtheffect_paramid FOREIGN KEY (paramid) REFERENCES tb_param(id)
-    , CONSTRAINT fk_paramhealtheffect_effectid FOREIGN KEY (effectid) REFERENCES tb_healtheffect(id)
-    , CONSTRAINT uc_param_healtheffect UNIQUE (paramid, effectid)
-);
-
-
 CREATE TABLE tb_servicetype (
     id INT NOT NULL PRIMARY KEY
     , typename VARCHAR(255) NOT NULL
