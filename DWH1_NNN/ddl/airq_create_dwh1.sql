@@ -2,7 +2,7 @@
 -- 1) DROP TABLE before attempting to create DWH schema tables
 -- -------------------------------
 DROP TABLE IF EXISTS ft_name2;
-DROP TABLE IF EXISTS ft_name1;
+DROP TABLE IF EXISTS ft_service;
 
 DROP TABLE IF EXISTS dim_device;
 DROP TABLE IF EXISTS dim_service_type;
@@ -107,10 +107,18 @@ CREATE TABLE dim_device (
 
 
 -- fact tables
-CREATE TABLE ft_name1 (
-    id INT NOT NULL PRIMARY KEY,
-    -- ...
-    etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE ft_service (
+    service_sk INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    timeday_sk INT NOT NULL REFERENCES dim_timeday(timeday_sk),
+    device_sk INT NOT NULL REFERENCES dim_device(device_sk),
+    servicetype_sk INT NOT NULL REFERENCES dim_service_type(servicetype_sk),
+    employment_sk INT NOT NULL REFERENCES dim_employment(employement_sk),
+    service_count INT NOT NULL CHECK (service_count > 0),
+    total_service_cost BIGINT NOT NULL,
+    total_duration_minutes BIGINT NOT NULL CHECK (total_duration_minutes >= 0),
+    avg_service_quality NUMERIC(12,6) NOT NULL CHECK (avg_service_quality BETWEEN 1 AND 5),
+    etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (timeday_sk, device_sk, servicetype_sk, employment_sk)
 );
 
 CREATE TABLE ft_name2 (
