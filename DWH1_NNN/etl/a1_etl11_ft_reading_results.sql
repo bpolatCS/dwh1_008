@@ -60,7 +60,7 @@ reading_detail AS (
     LEFT JOIN tb_paramsensortype pst ON pst.sensortypeid = sd.sensortypeid AND pst.paramid = re.paramid
     LEFT JOIN dim_paramalert pa ON pa.param_id = re.paramid AND re.recordedvalue >= pa.threshold_from AND (pa.threshold_to IS NULL OR re.recordedvalue < pa.threshold_to)
     LEFT JOIN parameter_effect_profile pep ON pep.param_id = re.paramid
-    LEFT JOIN dim_health_effect he ON he.effectname = pep.effect_profile
+    LEFT JOIN dim_health_effect he ON he.effect_profile = pep.effect_profile
     LEFT JOIN tb_weather w ON w.cityid = sd.cityid AND w.observedat = re.readat
 )
 SELECT
