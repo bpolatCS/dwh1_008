@@ -330,7 +330,7 @@ WITH sensor_quality AS (
         SUM(fact.data_quality_sum)::NUMERIC
             / NULLIF(SUM(fact.reading_count), 0) AS average_data_quality
     FROM ft_airquality_summary AS fact
-    JOIN dim_device AS device_dim
+    LEFT JOIN dim_device AS device_dim
         ON device_dim.device_sk = fact.device_sk
     JOIN dim_paramalert AS alert_dim
         ON alert_dim.paramalert_sk = fact.paramalert_sk
