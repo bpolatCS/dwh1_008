@@ -11,10 +11,9 @@
 -- speed <= 10 km/h. These are explicit analysis assumptions.
 
 -- DDL
-DROP TABLE IF EXISTS ft_airquality_summary;
-DROP TABLE IF EXISTS ft_name1;
+DROP TABLE IF EXISTS ft_reading_results;
 
-CREATE TABLE ft_airquality_summary (
+CREATE TABLE ft_reading_results (
     timeday_sk INT NOT NULL,
     device_sk INT NOT NULL,
     paramalert_sk INT NOT NULL,
@@ -30,30 +29,20 @@ CREATE TABLE ft_airquality_summary (
     data_quality_sum BIGINT NOT NULL,
     data_volume_kb_sum BIGINT NOT NULL,
     etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT pk_ft_airquality_summary
-        PRIMARY KEY (timeday_sk, device_sk, paramalert_sk, healtheffect_sk),
-    CONSTRAINT fk_ft_airquality_summary_timeday
-        FOREIGN KEY (timeday_sk) REFERENCES dim_timeday(timeday_sk),
-    CONSTRAINT fk_ft_airquality_summary_device
-        FOREIGN KEY (device_sk) REFERENCES dim_device(device_sk),
-    CONSTRAINT fk_ft_airquality_summary_paramalert
-        FOREIGN KEY (paramalert_sk) REFERENCES dim_paramalert(paramalert_sk),
-    CONSTRAINT fk_ft_airquality_summary_health_effect
-        FOREIGN KEY (healtheffect_sk) REFERENCES dim_health_effect(healtheffect_sk),
-    CONSTRAINT ck_ft_airquality_summary_accuracy
-        CHECK (sensor_accuracy IN ('High', 'Medium', 'Low')),
-    CONSTRAINT ck_ft_airquality_summary_rain
-        CHECK (rain_condition IN ('Rainy', 'Dry', 'Unknown')),
-    CONSTRAINT ck_ft_airquality_summary_wind
-        CHECK (wind_condition IN ('Calm', 'Windy', 'Unknown')),
-    CONSTRAINT ck_ft_airquality_summary_quality_sum
-        CHECK (data_quality_sum BETWEEN reading_count AND reading_count * 5),
-    CONSTRAINT ck_ft_airquality_summary_volume
-        CHECK (data_volume_kb_sum >= 0)
+    CONSTRAINT pk_ft_reading_results PRIMARY KEY (timeday_sk, device_sk, paramalert_sk, healtheffect_sk),
+    CONSTRAINT fk_ft_reading_results_timeday FOREIGN KEY (timeday_sk) REFERENCES dim_timeday(timeday_sk),
+    CONSTRAINT fk_ft_reading_results_device FOREIGN KEY (device_sk) REFERENCES dim_device(device_sk),
+    CONSTRAINT fk_ft_reading_results_paramalert FOREIGN KEY (paramalert_sk) REFERENCES dim_paramalert(paramalert_sk),
+    CONSTRAINT fk_ft_reading_results_health_effect FOREIGN KEY (healtheffect_sk) REFERENCES dim_health_effect(healtheffect_sk),
+    CONSTRAINT ck_ft_reading_results_accuracy CHECK (sensor_accuracy IN ('High', 'Medium', 'Low')),
+    CONSTRAINT ck_ft_reading_results_rain CHECK (rain_condition IN ('Rainy', 'Dry', 'Unknown')),
+    CONSTRAINT ck_ft_reading_results_wind CHECK (wind_condition IN ('Calm', 'Windy', 'Unknown')),
+    CONSTRAINT ck_ft_reading_results_quality_sum CHECK (data_quality_sum BETWEEN reading_count AND reading_count * 5),
+    CONSTRAINT ck_ft_reading_results_volume CHECK (data_volume_kb_sum >= 0)
 );
 
 -- ETL: aggregate source readings at the declared grain.
-INSERT INTO ft_airquality_summary (
+INSERT INTO ft_reading_results (
     timeday_sk,
     device_sk,
     paramalert_sk,
@@ -77,7 +66,9 @@ WITH parameter_effect_profile AS (
     LEFT JOIN tb_paramhealtheffect AS parameter_effect ON parameter_effect.paramid = parameter.id
     LEFT JOIN tb_healtheffect AS effect ON effect.id = parameter_effect.effectid
     GROUP BY parameter.id
-), reading_detail AS (
+), 
+
+reading_detail AS (
     SELECT
         time_dim.timeday_sk,
         device_dim.device_sk,

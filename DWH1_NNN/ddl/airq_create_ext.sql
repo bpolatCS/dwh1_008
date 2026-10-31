@@ -12,20 +12,20 @@ DROP TABLE IF EXISTS tb_healtheffect;
 
 -- Table X: health effect categories caused by air pollutants
 CREATE TABLE tb_healtheffect (
-    id INT NOT NULL PRIMARY KEY
-    , effectname VARCHAR(255) NOT NULL
-    , description VARCHAR(255) NOT NULL
-    , CONSTRAINT uc_healtheffect_effectname UNIQUE (effectname)
+    id INT NOT NULL PRIMARY KEY,
+    effectname VARCHAR(255) NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    CONSTRAINT uc_healtheffect_effectname UNIQUE (effectname)
 );
 
 -- Table Y: bridge tb_param <-> tb_healtheffect (M:N)
 CREATE TABLE tb_paramhealtheffect (
-    id INT NOT NULL PRIMARY KEY
-    , paramid INT NOT NULL
-    , effectid INT NOT NULL
-    , CONSTRAINT fk_paramhealtheffect_paramid FOREIGN KEY (paramid) REFERENCES tb_param(id)
-    , CONSTRAINT fk_paramhealtheffect_effectid FOREIGN KEY (effectid) REFERENCES tb_healtheffect(id)
-    , CONSTRAINT uc_param_healtheffect UNIQUE (paramid, effectid)
+    id INT NOT NULL PRIMARY KEY,
+    paramid INT NOT NULL,
+    effectid INT NOT NULL,
+    CONSTRAINT fk_paramhealtheffect_paramid FOREIGN KEY (paramid) REFERENCES tb_param(id),
+    CONSTRAINT fk_paramhealtheffect_effectid FOREIGN KEY (effectid) REFERENCES tb_healtheffect(id),
+    CONSTRAINT uc_param_healtheffect UNIQUE (paramid, effectid)
 );
 
 
