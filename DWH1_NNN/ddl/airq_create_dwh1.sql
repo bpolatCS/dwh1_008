@@ -1,7 +1,7 @@
 -- -------------------------------
 -- 1) DROP TABLE before attempting to create DWH schema tables
 -- -------------------------------
-DROP TABLE IF EXISTS ft_name2;
+DROP TABLE IF EXISTS ft_reading_results;
 DROP TABLE IF EXISTS ft_name1;
 
 DROP TABLE IF EXISTS dim_device;
@@ -107,10 +107,32 @@ CREATE TABLE dim_device (
 
 
 -- fact tables
-CREATE TABLE ft_name1 (
-    id INT NOT NULL PRIMARY KEY,
-    -- ...
-    etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE ft_reading_results (
+    timeday_sk INT NOT NULL,
+    device_sk INT NOT NULL,
+    paramalert_sk INT NOT NULL,
+    healtheffect_sk INT NOT NULL,
+    sensor_accuracy VARCHAR(10) NOT NULL,
+    rain_condition VARCHAR(10) NOT NULL,
+    wind_condition VARCHAR(10) NOT NULL,
+    precipitation_mm DECIMAL(6,1),
+    wind_speed_kmh DECIMAL(6,1),
+    reading_count BIGINT NOT NULL CHECK (reading_count > 0),
+    concentration_sum NUMERIC(18,4) NOT NULL,
+    peak_concentration NUMERIC(10,4) NOT NULL,
+    data_quality_sum BIGINT NOT NULL,
+    data_volume_kb_sum BIGINT NOT NULL,
+    etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT pk_ft_reading_results PRIMARY KEY (timeday_sk, device_sk, paramalert_sk, healtheffect_sk),
+    CONSTRAINT fk_ft_reading_results_timeday FOREIGN KEY (timeday_sk) REFERENCES dim_timeday(timeday_sk),
+    CONSTRAINT fk_ft_reading_results_device FOREIGN KEY (device_sk) REFERENCES dim_device(device_sk),
+    CONSTRAINT fk_ft_reading_results_paramalert FOREIGN KEY (paramalert_sk) REFERENCES dim_paramalert(paramalert_sk),
+    CONSTRAINT fk_ft_reading_results_health_effect FOREIGN KEY (healtheffect_sk) REFERENCES dim_health_effect(healtheffect_sk),
+    CONSTRAINT ck_ft_reading_results_accuracy CHECK (sensor_accuracy IN ('High', 'Medium', 'Low')),
+    CONSTRAINT ck_ft_reading_results_rain CHECK (rain_condition IN ('Rainy', 'Dry', 'Unknown')),
+    CONSTRAINT ck_ft_reading_results_wind CHECK (wind_condition IN ('Calm', 'Windy', 'Unknown')),
+    CONSTRAINT ck_ft_reading_results_quality_sum CHECK (data_quality_sum BETWEEN reading_count AND reading_count * 5),
+    CONSTRAINT ck_ft_reading_results_volume CHECK (data_volume_kb_sum >= 0)
 );
 
 CREATE TABLE ft_name2 (
