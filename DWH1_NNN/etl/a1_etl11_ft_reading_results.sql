@@ -1,4 +1,4 @@
--- DWH1 ETL: load ft_name1
+-- DWH1 ETL: load ft_reading_results
 -- The orchestrator supplies the warehouse/staging search_path for this transaction.
 
 -- Step 1: Truncate target table
