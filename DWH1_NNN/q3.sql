@@ -1,63 +1,31 @@
--- Question 3: Monthly Red/Crimson leaders and high-alert share trend.
-WITH monthly_alerts AS (
+-- Question 3: How did the monthly share of severe (Orange/Red/Crimson) alert readings in Turkey change between 2024 and 2025 for Istanbul vs. Ankara?
+WITH monthly AS (
     SELECT
-        DATE_TRUNC('month', t.full_date)::DATE AS month_start,
-        d.country_name,
-        d.city_name,
-        pa.param_id,
-        pa.param_name,
-        SUM(CASE WHEN pa.alert_name = 'Red' THEN fact.reading_count ELSE 0 END) AS red_exceedance_count,
-        SUM(CASE WHEN pa.alert_name = 'Crimson' THEN fact.reading_count ELSE 0 END) AS crimson_exceedance_count,
-        SUM(CASE WHEN pa.alert_name IN ('Red', 'Crimson') THEN fact.reading_count ELSE 0 END) AS high_alert_count,
-        SUM(fact.reading_count) AS reading_count
-    FROM dwh1_008.ft_reading_results AS fact
-    LEFT JOIN dwh1_008.dim_timeday AS t ON t.timeday_sk = fact.timeday_sk
-    LEFT JOIN dwh1_008.dim_device AS d ON d.device_sk = fact.device_sk
-    LEFT JOIN dwh1_008.dim_paramalert AS pa ON pa.paramalert_sk = fact.paramalert_sk
+        CASE WHEN d.city_name = 'Istanbul' THEN 'Istanbul' ELSE 'Ankara' END AS city_group,
+        pa.param_category,
+        t.month_number,
+        SUM(CASE WHEN t.year_number = 2024 THEN f.reading_count ELSE 0 END) AS readings_2024,
+        SUM(CASE WHEN t.year_number = 2025 THEN f.reading_count ELSE 0 END) AS readings_2025,
+        SUM(CASE WHEN t.year_number = 2024 AND pa.alert_level >= 2 THEN f.reading_count ELSE 0 END) AS severe_2024,
+        SUM(CASE WHEN t.year_number = 2025 AND pa.alert_level >= 2 THEN f.reading_count ELSE 0 END) AS severe_2025
+    FROM dwh1_008.ft_reading_results AS f
+    JOIN dwh1_008.dim_timeday AS t ON t.timeday_sk = f.timeday_sk
+    JOIN dwh1_008.dim_device AS d ON d.device_sk = f.device_sk
+    JOIN dwh1_008.dim_paramalert AS pa ON pa.paramalert_sk = f.paramalert_sk
+    WHERE d.country_name = 'Turkey'
     GROUP BY
-        DATE_TRUNC('month', t.full_date)::DATE,
-        d.country_name,
-        d.city_name,
-        pa.param_id,
-        pa.param_name
-),
-monthly_shares AS (
-    SELECT
-        monthly_alerts.*,
-        ROUND(100.0 * high_alert_count / NULLIF(reading_count, 0), 2) AS high_alert_share_percentage
-    FROM monthly_alerts
-),
-trends AS (
-    SELECT
-        monthly_shares.*,
-        LAG(high_alert_share_percentage) OVER (PARTITION BY country_name, city_name, param_id ORDER BY month_start) AS previous_month_share
-    FROM monthly_shares
-),
-ranked_alerts AS (
-    SELECT
-        trends.*,
-        DENSE_RANK() OVER (PARTITION BY month_start ORDER BY red_exceedance_count DESC) AS red_rank,
-        DENSE_RANK() OVER (PARTITION BY month_start ORDER BY crimson_exceedance_count DESC) AS crimson_rank
-    FROM trends
+        CASE WHEN d.city_name = 'Istanbul' THEN 'Istanbul' ELSE 'Ankara' END,
+        pa.param_category,
+        t.month_number
 )
 SELECT
-    month_start,
-    country_name,
-    city_name,
-    param_id,
-    param_name,
-    red_exceedance_count,
-    crimson_exceedance_count,
-    high_alert_share_percentage,
-    previous_month_share,
-    high_alert_share_percentage - previous_month_share AS share_change,
-    CASE
-        WHEN previous_month_share IS NULL THEN 'No previous month'
-        WHEN high_alert_share_percentage > previous_month_share THEN 'Increasing'
-        WHEN high_alert_share_percentage < previous_month_share THEN 'Decreasing'
-        ELSE 'Unchanged'
-    END AS share_trend,
-    red_rank,
-    crimson_rank
-FROM ranked_alerts
-ORDER BY month_start, red_rank, crimson_rank, country_name, city_name, param_name;
+    city_group,
+    param_category,
+    month_number,
+    readings_2024,
+    readings_2025,
+    ROUND(100.0 * severe_2024 / NULLIF(readings_2024, 0), 2) AS severe_pct_2024,
+    ROUND(100.0 * severe_2025 / NULLIF(readings_2025, 0), 2) AS severe_pct_2025,
+    ROUND(100.0 * severe_2025 / NULLIF(readings_2025, 0) - 100.0 * severe_2024 / NULLIF(readings_2024, 0), 2) AS change_pp
+FROM monthly
+ORDER BY city_group, param_category, month_number;

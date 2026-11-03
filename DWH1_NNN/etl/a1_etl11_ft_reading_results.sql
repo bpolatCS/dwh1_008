@@ -10,11 +10,7 @@ INSERT INTO ft_reading_results (
     device_sk,
     paramalert_sk,
     healtheffect_sk,
-    sensor_accuracy,
-    rain_condition,
-    wind_condition,
-    precipitation_mm,
-    wind_speed_kmh,
+    weather_sk,
     reading_count,
     concentration_sum,
     peak_concentration,
@@ -31,25 +27,30 @@ WITH parameter_effect_profile AS (
     GROUP BY parameter.id
 ), 
 
+weather_condition AS (
+    SELECT
+        cityid,
+        observedat,
+        CASE
+            WHEN precipmm IS NULL THEN 'Unknown'
+            WHEN precipmm > 0 THEN 'Rainy'
+            ELSE 'Dry'
+        END AS rain_condition,
+        CASE
+            WHEN windspeed IS NULL THEN 'Unknown'
+            WHEN windspeed <= 10 THEN 'Calm'
+            ELSE 'Windy'
+        END AS wind_condition
+    FROM tb_weather
+),
+
 reading_detail AS (
     SELECT
         t.timeday_sk,
         d.device_sk,
         pa.paramalert_sk,
         he.healtheffect_sk,
-        pst.accuracy AS sensor_accuracy,
-        CASE
-            WHEN w.precipmm IS NULL THEN 'Unknown'
-            WHEN w.precipmm > 0 THEN 'Rainy'
-            ELSE 'Dry'
-        END AS rain_condition,
-        CASE
-            WHEN w.windspeed IS NULL THEN 'Unknown'
-            WHEN w.windspeed <= 10 THEN 'Calm'
-            ELSE 'Windy'
-        END AS wind_condition,
-        w.precipmm AS precipitation_mm,
-        w.windspeed AS wind_speed_kmh,
+        dw.weather_sk,
         re.recordedvalue,
         re.dataquality,
         re.datavolumekb
@@ -57,22 +58,18 @@ reading_detail AS (
     LEFT JOIN tb_sensordevice sd ON sd.id = re.sensordevid
     LEFT JOIN dim_device d ON d.device_id = sd.id
     LEFT JOIN dim_timeday t ON t.full_date = re.readat
-    LEFT JOIN tb_paramsensortype pst ON pst.sensortypeid = sd.sensortypeid AND pst.paramid = re.paramid
     LEFT JOIN dim_paramalert pa ON pa.param_id = re.paramid AND re.recordedvalue >= pa.threshold_from AND (pa.threshold_to IS NULL OR re.recordedvalue < pa.threshold_to)
     LEFT JOIN parameter_effect_profile pep ON pep.param_id = re.paramid
     LEFT JOIN dim_health_effect he ON he.effect_profile = pep.effect_profile
-    LEFT JOIN tb_weather w ON w.cityid = sd.cityid AND w.observedat = re.readat
+    LEFT JOIN weather_condition wc ON wc.cityid = sd.cityid AND wc.observedat = re.readat
+    LEFT JOIN dim_weather dw ON dw.rain_condition = wc.rain_condition AND dw.wind_condition = wc.wind_condition
 )
 SELECT
     timeday_sk,
     device_sk,
     paramalert_sk,
     healtheffect_sk,
-    sensor_accuracy,
-    rain_condition,
-    wind_condition,
-    precipitation_mm,
-    wind_speed_kmh,
+    weather_sk,
     COUNT(*) AS reading_count,
     SUM(recordedvalue) AS concentration_sum,
     MAX(recordedvalue) AS peak_concentration,
@@ -84,8 +81,4 @@ GROUP BY
     device_sk,
     paramalert_sk,
     healtheffect_sk,
-    sensor_accuracy,
-    rain_condition,
-    wind_condition,
-    precipitation_mm,
-    wind_speed_kmh;
+    weather_sk;

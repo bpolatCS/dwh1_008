@@ -1,54 +1,25 @@
--- Question 2: Compare concentration and exceedance rates across rainy/dry and calm/windy days.
-WITH weather_comparison AS (
-    SELECT
-        'Rain' AS weather_factor,
-        fact.rain_condition AS weather_condition,
-        d.country_name,
-        d.city_name,
-        pa.param_category,
-        SUM(fact.concentration_sum) / NULLIF(SUM(fact.reading_count), 0) AS average_concentration,
-        SUM(CASE WHEN pa.alert_level > 0 THEN fact.reading_count ELSE 0 END) AS exceedance_count,
-        SUM(fact.reading_count) AS reading_count
-    FROM dwh1_008.ft_reading_results AS fact
-    LEFT JOIN dwh1_008.dim_device AS d ON d.device_sk = fact.device_sk
-    LEFT JOIN dwh1_008.dim_paramalert AS pa ON pa.paramalert_sk = fact.paramalert_sk
-    WHERE fact.rain_condition IN ('Rainy', 'Dry')
-    GROUP BY
-        fact.rain_condition,
-        d.country_name,
-        d.city_name,
-        pa.param_category
-
-    UNION ALL
-
-    SELECT
-        'Wind' AS weather_factor,
-        fact.wind_condition AS weather_condition,
-        d.country_name,
-        d.city_name,
-        pa.param_category,
-        SUM(fact.concentration_sum) / NULLIF(SUM(fact.reading_count), 0) AS average_concentration,
-        SUM(CASE WHEN pa.alert_level > 0 THEN fact.reading_count ELSE 0 END) AS exceedance_count,
-        SUM(fact.reading_count) AS reading_count
-    FROM dwh1_008.ft_reading_results AS fact
-    LEFT JOIN dwh1_008.dim_device AS d ON d.device_sk = fact.device_sk
-    LEFT JOIN dwh1_008.dim_paramalert AS pa ON pa.paramalert_sk = fact.paramalert_sk
-    WHERE fact.wind_condition IN ('Calm', 'Windy')
-    GROUP BY
-        fact.wind_condition,
-        d.country_name,
-        d.city_name,
-        pa.param_category
-)
+-- Question 2: In which countries are the readings of each health effect most often in a severe (Red/Crimson) alert, and how are they distributed across all alert types?
 SELECT
-    weather_factor,
-    weather_condition,
-    country_name,
-    city_name,
-    param_category,
-    average_concentration,
-    exceedance_count,
-    reading_count,
-    ROUND(100.0 * exceedance_count / NULLIF(reading_count, 0), 2) AS exceedance_percentage
-FROM weather_comparison
-ORDER BY weather_factor, country_name, city_name, param_category, weather_condition;
+    e.effect_name,
+    d.country_name,
+    ROUND(100.0 * COALESCE(SUM(f.reading_count) FILTER (WHERE pa.alert_name = 'No alert'), 0) / SUM(f.reading_count), 2) AS no_alert_pct,
+    ROUND(100.0 * COALESCE(SUM(f.reading_count) FILTER (WHERE pa.alert_name = 'Yellow'), 0)   / SUM(f.reading_count), 2) AS yellow_pct,
+    ROUND(100.0 * COALESCE(SUM(f.reading_count) FILTER (WHERE pa.alert_name = 'Orange'), 0)   / SUM(f.reading_count), 2) AS orange_pct,
+    ROUND(100.0 * COALESCE(SUM(f.reading_count) FILTER (WHERE pa.alert_name = 'Red'), 0)      / SUM(f.reading_count), 2) AS red_pct,
+    ROUND(100.0 * COALESCE(SUM(f.reading_count) FILTER (WHERE pa.alert_name = 'Crimson'), 0)  / SUM(f.reading_count), 2) AS crimson_pct,
+    ROUND(100.0 * COALESCE(SUM(f.reading_count) FILTER (WHERE pa.alert_level >= 3), 0)        / SUM(f.reading_count), 2) AS severe_share_pct
+FROM dwh1_008.ft_reading_results AS f
+JOIN dwh1_008.dim_health_effect AS he ON he.healtheffect_sk = f.healtheffect_sk
+JOIN dwh1_008.dim_paramalert AS pa ON pa.paramalert_sk = f.paramalert_sk
+JOIN dwh1_008.dim_device AS d ON d.device_sk = f.device_sk
+CROSS JOIN LATERAL (VALUES
+    ('Respiratory',    he.is_respiratory),
+    ('Cardiovascular', he.is_cardiovascular),
+    ('Cancer risk',    he.is_cancer_risk),
+    ('Neurological',   he.is_neurological),
+    ('Allergic',       he.is_allergic),
+    ('Eye irritation', he.is_eye_irritation)
+) AS e(effect_name, has_effect)
+WHERE e.has_effect
+GROUP BY e.effect_name, d.country_name
+ORDER BY e.effect_name, severe_share_pct DESC, d.country_name;
