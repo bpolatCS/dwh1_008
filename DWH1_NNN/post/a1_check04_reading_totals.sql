@@ -5,14 +5,14 @@ WITH source_summary AS (
         COUNT(*) AS source_readings,
         COALESCE(SUM(dataquality), 0) AS source_quality,
         COALESCE(SUM(datavolumekb), 0) AS source_volume
-    FROM stg1_008.tb_readingevent
+    FROM tb_readingevent
 ),
 fact_summary AS (
     SELECT
         COALESCE(SUM(reading_count), 0) AS fact_readings,
         COALESCE(SUM(data_quality_sum), 0) AS fact_quality,
         COALESCE(SUM(data_volume_kb_sum), 0) AS fact_volume
-    FROM dwh1_008.ft_reading_results
+    FROM ft_reading_results
 )
 SELECT
     'Reading totals match source' AS check_name,
