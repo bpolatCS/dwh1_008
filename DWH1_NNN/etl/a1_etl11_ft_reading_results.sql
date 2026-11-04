@@ -76,9 +76,4 @@ SELECT
     SUM(dataquality) AS data_quality_sum,
     SUM(datavolumekb) AS data_volume_kb_sum
 FROM reading_detail
-GROUP BY
-    timeday_sk,
-    device_sk,
-    paramalert_sk,
-    healtheffect_sk,
-    weather_sk;
+GROUP BY timeday_sk, device_sk, paramalert_sk, healtheffect_sk, weather_sk;

@@ -28,7 +28,7 @@ WITH bands AS (
         a.colour AS alert_colour,
         pa.threshold AS threshold_from
     FROM tb_paramalert pa
-    JOIN tb_alert a ON a.id = pa.alertid
+    LEFT JOIN tb_alert a ON a.id = pa.alertid
     
     UNION ALL
     
@@ -54,5 +54,5 @@ SELECT
     b.threshold_from,
     LEAD(b.threshold_from) OVER (PARTITION BY b.param_id ORDER BY b.alert_level) as threshold_to
 FROM bands b
-JOIN tb_param p ON p.id = b.param_id
+LEFT JOIN tb_param p ON p.id = b.param_id
 ORDER BY p.id, b.alert_level;

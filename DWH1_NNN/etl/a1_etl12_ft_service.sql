@@ -27,14 +27,10 @@ WITH service_detail AS (
         se.durationminutes,
         se.servicequality
     FROM tb_serviceevent AS se
-    LEFT JOIN dim_timeday AS t
-        ON t.full_date = se.servicedat
-    LEFT JOIN dim_device AS d
-        ON d.device_id = se.sensordevid
-    LEFT JOIN dim_service_type AS st
-        ON st.servicetype_id = se.servicetypeid
-    LEFT JOIN dim_employment AS e
-        ON e.employee_id = se.employeeid
+    LEFT JOIN dim_timeday AS t ON t.full_date = se.servicedat
+    LEFT JOIN dim_device AS d ON d.device_id = se.sensordevid
+    LEFT JOIN dim_service_type AS st ON st.servicetype_id = se.servicetypeid
+    LEFT JOIN dim_employment AS e ON e.employee_id = se.employeeid
 )
 SELECT
     timeday_sk,
@@ -47,8 +43,7 @@ SELECT
     MAX(durationminutes) AS max_duration_minutes,
     AVG(servicequality)::NUMERIC(12,6) AS avg_service_quality
 FROM service_detail
-WHERE
-    timeday_sk IS NOT NULL
+WHERE timeday_sk IS NOT NULL
     AND device_sk IS NOT NULL
     AND servicetype_sk IS NOT NULL
     AND employment_sk IS NOT NULL

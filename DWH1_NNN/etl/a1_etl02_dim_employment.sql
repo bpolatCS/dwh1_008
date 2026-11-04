@@ -27,5 +27,5 @@ SELECT
     COALESCE(e.validto, DATE '9999-12-31'),
     ROW_NUMBER() OVER (PARTITION BY e.badgenumber ORDER BY e.validfrom DESC) = 1
 FROM tb_employee e
-JOIN tb_role r ON r.id = e.roleid
+LEFT JOIN tb_role r ON r.id = e.roleid
 ORDER BY e.badgenumber, e.validfrom;
