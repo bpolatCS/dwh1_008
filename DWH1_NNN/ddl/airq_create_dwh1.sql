@@ -106,7 +106,6 @@ CREATE TABLE dim_device (
     etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Static junk dimension: rain condition x wind condition
 CREATE TABLE dim_weather (
     weather_sk INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     rain_condition VARCHAR(10) NOT NULL CHECK (rain_condition IN ('Rainy', 'Dry', 'Unknown')),
