@@ -4,6 +4,7 @@
 DROP TABLE IF EXISTS ft_reading_results;
 DROP TABLE IF EXISTS ft_service;
 
+DROP TABLE IF EXISTS dim_weather;
 DROP TABLE IF EXISTS dim_device;
 DROP TABLE IF EXISTS dim_service_type;
 DROP TABLE IF EXISTS dim_timeday;
@@ -105,6 +106,13 @@ CREATE TABLE dim_device (
     etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE dim_weather (
+    weather_sk INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    rain_condition VARCHAR(10) NOT NULL CHECK (rain_condition IN ('Rainy', 'Dry', 'Unknown')),
+    wind_condition VARCHAR(10) NOT NULL CHECK (wind_condition IN ('Calm', 'Windy', 'Unknown')),
+    etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (rain_condition, wind_condition)
+);
 
 -- fact tables
 CREATE TABLE ft_reading_results (
@@ -112,11 +120,7 @@ CREATE TABLE ft_reading_results (
     device_sk INT NOT NULL,
     paramalert_sk INT NOT NULL,
     healtheffect_sk INT NOT NULL,
-    sensor_accuracy VARCHAR(10) NOT NULL,
-    rain_condition VARCHAR(10) NOT NULL,
-    wind_condition VARCHAR(10) NOT NULL,
-    precipitation_mm DECIMAL(6,1),
-    wind_speed_kmh DECIMAL(6,1),
+    weather_sk INT NOT NULL,
     reading_count BIGINT NOT NULL CHECK (reading_count > 0),
     concentration_sum NUMERIC(18,4) NOT NULL,
     peak_concentration NUMERIC(10,4) NOT NULL,
@@ -128,9 +132,7 @@ CREATE TABLE ft_reading_results (
     CONSTRAINT fk_ft_reading_results_device FOREIGN KEY (device_sk) REFERENCES dim_device(device_sk),
     CONSTRAINT fk_ft_reading_results_paramalert FOREIGN KEY (paramalert_sk) REFERENCES dim_paramalert(paramalert_sk),
     CONSTRAINT fk_ft_reading_results_health_effect FOREIGN KEY (healtheffect_sk) REFERENCES dim_health_effect(healtheffect_sk),
-    CONSTRAINT ck_ft_reading_results_accuracy CHECK (sensor_accuracy IN ('High', 'Medium', 'Low')),
-    CONSTRAINT ck_ft_reading_results_rain CHECK (rain_condition IN ('Rainy', 'Dry', 'Unknown')),
-    CONSTRAINT ck_ft_reading_results_wind CHECK (wind_condition IN ('Calm', 'Windy', 'Unknown')),
+    CONSTRAINT fk_ft_reading_results_weather FOREIGN KEY (weather_sk) REFERENCES dim_weather(weather_sk),
     CONSTRAINT ck_ft_reading_results_quality_sum CHECK (data_quality_sum BETWEEN reading_count AND reading_count * 5),
     CONSTRAINT ck_ft_reading_results_volume CHECK (data_volume_kb_sum >= 0)
 );
