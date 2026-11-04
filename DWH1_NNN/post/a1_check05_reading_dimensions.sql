@@ -8,12 +8,12 @@ WITH dimension_summary AS (
         COUNT(CASE WHEN pa.paramalert_sk IS NULL THEN 1 END) AS missing_paramalert,
         COUNT(CASE WHEN he.healtheffect_sk IS NULL THEN 1 END) AS missing_health_effect,
         COUNT(CASE WHEN w.weather_sk IS NULL THEN 1 END) AS missing_weather
-    FROM dwh1_008.ft_reading_results f
-    LEFT JOIN dwh1_008.dim_timeday t ON t.timeday_sk = f.timeday_sk
-    LEFT JOIN dwh1_008.dim_device d ON d.device_sk = f.device_sk
-    LEFT JOIN dwh1_008.dim_paramalert pa ON pa.paramalert_sk = f.paramalert_sk
-    LEFT JOIN dwh1_008.dim_health_effect he ON he.healtheffect_sk = f.healtheffect_sk
-    LEFT JOIN dwh1_008.dim_weather w ON w.weather_sk = f.weather_sk
+    FROM ft_reading_results f
+    LEFT JOIN dim_timeday t ON t.timeday_sk = f.timeday_sk
+    LEFT JOIN dim_device d ON d.device_sk = f.device_sk
+    LEFT JOIN dim_paramalert pa ON pa.paramalert_sk = f.paramalert_sk
+    LEFT JOIN dim_health_effect he ON he.healtheffect_sk = f.healtheffect_sk
+    LEFT JOIN dim_weather w ON w.weather_sk = f.weather_sk
 )
 SELECT
     'Reading dimension references are valid' AS check_name,
