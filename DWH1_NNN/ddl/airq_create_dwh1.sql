@@ -46,7 +46,7 @@ CREATE TABLE dim_health_effect (
     is_allergic BOOLEAN NOT NULL,
     is_eye_irritation BOOLEAN NOT NULL,
     etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uc_dim_healtheffect_profile UNIQUE (effect_profile)
+    CONSTRAINT uc_dim_health_effect_profile UNIQUE (effect_profile)
 );
 
 

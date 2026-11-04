@@ -12,7 +12,7 @@ WITH dimension_summary AS (
     LEFT JOIN dim_timeday t ON t.timeday_sk = f.timeday_sk
     LEFT JOIN dim_device d ON d.device_sk = f.device_sk
     LEFT JOIN dim_paramalert pa ON pa.paramalert_sk = f.paramalert_sk
-    LEFT JOIN dim_healtheffect he ON he.healtheffect_sk = f.healtheffect_sk
+    LEFT JOIN dim_health_effect he ON he.healtheffect_sk = f.healtheffect_sk
     LEFT JOIN dim_weather w ON w.weather_sk = f.weather_sk
 )
 SELECT
