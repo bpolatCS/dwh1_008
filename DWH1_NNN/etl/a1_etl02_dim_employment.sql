@@ -14,8 +14,7 @@ INSERT INTO dim_employment (
     role_category,
     effective_date,
     expiry_date,
-    is_current,
-    is_deleted
+    is_current
 )
 SELECT
     e.id,
@@ -26,8 +25,7 @@ SELECT
     r.category,
     e.validfrom,
     COALESCE(e.validto, DATE '9999-12-31'),
-    ROW_NUMBER() OVER (PARTITION BY e.badgenumber ORDER BY e.validfrom DESC) = 1,
-    ROW_NUMBER() OVER (PARTITION BY e.badgenumber ORDER BY e.validfrom DESC) = 1 AND e.validto IS NOT NULL
+    ROW_NUMBER() OVER (PARTITION BY e.badgenumber ORDER BY e.validfrom DESC) = 1
 FROM tb_employee e
 JOIN tb_role r ON r.id = e.roleid
 ORDER BY e.badgenumber, e.validfrom;
