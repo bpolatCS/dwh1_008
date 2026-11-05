@@ -1,18 +1,18 @@
 
 -- Check 02: Service grain
--- Checks that each combination of day, device,
+-- Checks that each combination of month, device,
 -- service type and employment appears only once.
 
 WITH duplicate_groups AS (
     SELECT
-        timeday_sk,
+        month_sk,
         device_sk,
         servicetype_sk,
         employment_sk,
         COUNT(*) AS row_count
     FROM ft_service
     GROUP BY
-        timeday_sk,
+        month_sk,
         device_sk,
         servicetype_sk,
         employment_sk

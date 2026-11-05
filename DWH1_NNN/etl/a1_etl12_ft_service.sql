@@ -7,7 +7,7 @@ TRUNCATE TABLE ft_service RESTART IDENTITY;
 
 -- Step 2: Insert from source
 INSERT INTO ft_service (
-    timeday_sk,
+    month_sk,
     device_sk,
     servicetype_sk,
     employment_sk,
@@ -19,7 +19,7 @@ INSERT INTO ft_service (
 )
 WITH service_detail AS (
     SELECT
-        t.timeday_sk,
+        t.month_sk,
         d.device_sk,
         st.servicetype_sk,
         e.employement_sk AS employment_sk,
@@ -27,8 +27,8 @@ WITH service_detail AS (
         se.durationminutes,
         se.servicequality
     FROM tb_serviceevent AS se
-    LEFT JOIN dim_timeday AS t
-        ON t.full_date = se.servicedat
+    LEFT JOIN dim_timemonth AS t
+        ON t.month_start = DATE_TRUNC('month', se.servicedat)::DATE
     LEFT JOIN dim_device AS d
         ON d.device_id = se.sensordevid
     LEFT JOIN dim_service_type AS st
@@ -37,7 +37,7 @@ WITH service_detail AS (
         ON e.employee_id = se.employeeid
 )
 SELECT
-    timeday_sk,
+    month_sk,
     device_sk,
     servicetype_sk,
     employment_sk,
@@ -48,12 +48,12 @@ SELECT
     AVG(servicequality)::NUMERIC(12,6) AS avg_service_quality
 FROM service_detail
 WHERE
-    timeday_sk IS NOT NULL
+    month_sk IS NOT NULL
     AND device_sk IS NOT NULL
     AND servicetype_sk IS NOT NULL
     AND employment_sk IS NOT NULL
 GROUP BY
-    timeday_sk,
+    month_sk,
     device_sk,
     servicetype_sk,
     employment_sk;

@@ -71,16 +71,6 @@ CREATE TABLE dim_paramalert (
     CHECK (threshold_to IS NULL OR threshold_to > threshold_from)
 );
 
-CREATE TABLE dim_timeday (
-    timeday_sk INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    full_date DATE NOT NULL UNIQUE,
-    day_number INT NOT NULL CHECK (day_number BETWEEN 1 AND 31),
-    month_number INT NOT NULL CHECK (month_number BETWEEN 1 AND 12),
-    quarter_number INT NOT NULL CHECK (quarter_number BETWEEN 1 AND 4),
-    year_number INT NOT NULL,
-    etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
 CREATE TABLE dim_timemonth (
     month_sk INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     year_number INT NOT NULL,
@@ -149,21 +139,16 @@ CREATE TABLE ft_reading_results (
 );
 
 CREATE TABLE ft_service (
-    service_sk INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    timeday_sk INT NOT NULL REFERENCES dim_timeday(timeday_sk),
+    month_sk INT NOT NULL REFERENCES dim_timemonth(month_sk),
     device_sk INT NOT NULL REFERENCES dim_device(device_sk),
     servicetype_sk INT NOT NULL REFERENCES dim_service_type(servicetype_sk),
     employment_sk INT NOT NULL REFERENCES dim_employment(employement_sk),
-
     service_count INT NOT NULL CHECK (service_count > 0),
     total_service_cost BIGINT NOT NULL,
     total_duration_minutes BIGINT NOT NULL CHECK (total_duration_minutes >= 0),
     max_duration_minutes INT NOT NULL CHECK (max_duration_minutes >= 0),
-    avg_service_quality NUMERIC(12,6) NOT NULL
-        CHECK (avg_service_quality BETWEEN 1 AND 5),
-
+    avg_service_quality NUMERIC(12,6) NOT NULL CHECK (avg_service_quality BETWEEN 1 AND 5),
     etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    UNIQUE (timeday_sk, device_sk, servicetype_sk, employment_sk)
+    PRIMARY KEY (month_sk, device_sk, servicetype_sk, employment_sk)
 );
 
