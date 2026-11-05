@@ -6,7 +6,7 @@ TRUNCATE TABLE ft_reading_results RESTART IDENTITY;
 
 -- Step 2: Insert from source
 INSERT INTO ft_reading_results (
-    timeday_sk,
+    month_sk,
     device_sk,
     paramalert_sk,
     healtheffect_sk,
@@ -46,7 +46,7 @@ weather_condition AS (
 
 reading_detail AS (
     SELECT
-        t.timeday_sk,
+        tm.month_sk,
         d.device_sk,
         pa.paramalert_sk,
         he.healtheffect_sk,
@@ -57,7 +57,7 @@ reading_detail AS (
     FROM tb_readingevent re
     LEFT JOIN tb_sensordevice sd ON sd.id = re.sensordevid
     LEFT JOIN dim_device d ON d.device_id = sd.id
-    LEFT JOIN dim_timeday t ON t.full_date = re.readat
+    LEFT JOIN dim_timemonth tm ON tm.month_start = DATE_TRUNC('month', re.readat)::DATE
     LEFT JOIN dim_paramalert pa ON pa.param_id = re.paramid AND re.recordedvalue >= pa.threshold_from AND (pa.threshold_to IS NULL OR re.recordedvalue < pa.threshold_to)
     LEFT JOIN parameter_effect_profile pep ON pep.param_id = re.paramid
     LEFT JOIN dim_health_effect he ON he.effect_profile = pep.effect_profile
@@ -65,7 +65,7 @@ reading_detail AS (
     LEFT JOIN dim_weather dw ON dw.rain_condition = wc.rain_condition AND dw.wind_condition = wc.wind_condition
 )
 SELECT
-    timeday_sk,
+    month_sk,
     device_sk,
     paramalert_sk,
     healtheffect_sk,
@@ -77,7 +77,7 @@ SELECT
     SUM(datavolumekb) AS data_volume_kb_sum
 FROM reading_detail
 GROUP BY
-    timeday_sk,
+    month_sk,
     device_sk,
     paramalert_sk,
     healtheffect_sk,

@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS dim_weather;
 DROP TABLE IF EXISTS dim_device;
 DROP TABLE IF EXISTS dim_service_type;
 DROP TABLE IF EXISTS dim_timeday;
+DROP TABLE IF EXISTS dim_timemonth;
 DROP TABLE IF EXISTS dim_paramalert;
 DROP TABLE IF EXISTS dim_health_effect;
 DROP TABLE IF EXISTS dim_employment;
@@ -80,6 +81,16 @@ CREATE TABLE dim_timeday (
     etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE dim_timemonth (
+    month_sk INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    year_number INT NOT NULL,
+    quarter_number INT NOT NULL CHECK (quarter_number BETWEEN 1 AND 4),
+    month_number INT NOT NULL CHECK (month_number BETWEEN 1 AND 12),
+    month_start DATE NOT NULL UNIQUE,
+    etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uc_dim_timemonth_year_month UNIQUE (year_number, month_number)
+);
+
 CREATE TABLE dim_service_type (
     servicetype_sk INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     servicetype_id INT NOT NULL UNIQUE,
@@ -116,7 +127,7 @@ CREATE TABLE dim_weather (
 
 -- fact tables
 CREATE TABLE ft_reading_results (
-    timeday_sk INT NOT NULL,
+    month_sk INT NOT NULL,
     device_sk INT NOT NULL,
     paramalert_sk INT NOT NULL,
     healtheffect_sk INT NOT NULL,
@@ -127,8 +138,8 @@ CREATE TABLE ft_reading_results (
     data_quality_sum BIGINT NOT NULL,
     data_volume_kb_sum BIGINT NOT NULL,
     etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT pk_ft_reading_results PRIMARY KEY (timeday_sk, device_sk, paramalert_sk, healtheffect_sk),
-    CONSTRAINT fk_ft_reading_results_timeday FOREIGN KEY (timeday_sk) REFERENCES dim_timeday(timeday_sk),
+    CONSTRAINT pk_ft_reading_results PRIMARY KEY (month_sk, device_sk, paramalert_sk, weather_sk),
+    CONSTRAINT fk_ft_reading_results_timemonth FOREIGN KEY (month_sk) REFERENCES dim_timemonth(month_sk),
     CONSTRAINT fk_ft_reading_results_device FOREIGN KEY (device_sk) REFERENCES dim_device(device_sk),
     CONSTRAINT fk_ft_reading_results_paramalert FOREIGN KEY (paramalert_sk) REFERENCES dim_paramalert(paramalert_sk),
     CONSTRAINT fk_ft_reading_results_health_effect FOREIGN KEY (healtheffect_sk) REFERENCES dim_health_effect(healtheffect_sk),

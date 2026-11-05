@@ -9,7 +9,7 @@ WITH monthly AS (
         SUM(CASE WHEN t.year_number = 2024 AND pa.alert_level >= 2 THEN f.reading_count ELSE 0 END) AS severe_2024,
         SUM(CASE WHEN t.year_number = 2025 AND pa.alert_level >= 2 THEN f.reading_count ELSE 0 END) AS severe_2025
     FROM dwh1_008.ft_reading_results AS f
-    JOIN dwh1_008.dim_timeday AS t ON t.timeday_sk = f.timeday_sk
+    JOIN dwh1_008.dim_timemonth AS t ON t.month_sk = f.month_sk
     JOIN dwh1_008.dim_device AS d ON d.device_sk = f.device_sk
     JOIN dwh1_008.dim_paramalert AS pa ON pa.paramalert_sk = f.paramalert_sk
     WHERE d.country_name = 'Turkey'
