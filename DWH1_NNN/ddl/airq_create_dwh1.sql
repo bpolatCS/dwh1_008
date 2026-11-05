@@ -28,7 +28,6 @@ CREATE TABLE dim_employment (
     effective_date DATE NOT NULL,
     expiry_date DATE NOT NULL,
     is_current BOOLEAN NOT NULL,
-    is_deleted BOOLEAN NOT NULL,
     etl_load_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uc_dim_employment_src UNIQUE (employee_id),
     CONSTRAINT uc_dim_employment_badge_eff UNIQUE (badge_number, effective_date),
