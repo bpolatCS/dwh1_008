@@ -19,12 +19,12 @@ INSERT INTO ft_reading_results (
 )
 WITH parameter_effect_profile AS (
     SELECT
-        parameter.id AS param_id,
+        p.id AS param_id,
         COALESCE(STRING_AGG(effect.effectname, ', ' ORDER BY effect.effectname), 'No known effect') AS effect_profile
-    FROM tb_param AS parameter
-    LEFT JOIN tb_paramhealtheffect AS parameter_effect ON parameter_effect.paramid = parameter.id
+    FROM tb_param AS p
+    LEFT JOIN tb_paramhealtheffect AS parameter_effect ON parameter_effect.paramid = p.id
     LEFT JOIN tb_healtheffect AS effect ON effect.id = parameter_effect.effectid
-    GROUP BY parameter.id
+    GROUP BY p.id
 ), 
 
 weather_condition AS (
