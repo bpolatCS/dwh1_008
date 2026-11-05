@@ -7,7 +7,6 @@ DROP TABLE IF EXISTS ft_service;
 DROP TABLE IF EXISTS dim_weather;
 DROP TABLE IF EXISTS dim_device;
 DROP TABLE IF EXISTS dim_service_type;
-DROP TABLE IF EXISTS dim_timeday;
 DROP TABLE IF EXISTS dim_timemonth;
 DROP TABLE IF EXISTS dim_paramalert;
 DROP TABLE IF EXISTS dim_health_effect;
